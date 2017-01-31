@@ -117,9 +117,6 @@ count(
           land="NLD"       (: Netherlands Alpha-3 :)
 
      )
-     (: BSN numbers are excluded from the XML file, thus no need to
-        check 11 test
-
 
      and                   (: Pass 11 Test :)
 
@@ -139,7 +136,6 @@ count(
       mod 11 = 0
 
        )
-     :)
 
     ]
 )
@@ -318,10 +314,6 @@ count(
 
      )
 	 
-     (: BSN numbers are excluded from the XML file, thus no need to
-        check 11 test
-
-
      and                   (: Pass 11 Test :)
 
      (
@@ -340,7 +332,6 @@ count(
       mod 11 = 0
 
        )
-     :)
 
 
     ]
@@ -523,7 +514,7 @@ sum(/bericht/rekening[label="SAV"]/rekeningopgave/saldo/text())
 (: Savings accounts are labelled as SAV in this case :)
 ```
 
-- How many records have insufficient address data in the DGS XML data file?
+- Ensure that all records sufficient address data in the DGS XML data file. Ideally, returns 0.
 
 ```XPath
 count(
@@ -547,6 +538,159 @@ count(
  )
 ```
 
+- Verify that all reported email addresses are seemingly correct. Ideally, returns 0.
 
+```XPath
+count(
+
+/bericht/rekening/rekeningopgave/rekeninghouder
+
+[
+
+	( 
+
+		emailadres != ""		  (: Not-Empty :)
+
+		and not
+
+		(
+	
+			matches(upper-case(emailadres),
+                   
+                    '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$')
+		)
+	)
+
+]
+
+)
+```
+
+- Verify that all reported mobile phone numbers for residents are seemingly correct. Ideally, returns 0.
+
+```XPath
+/bericht/rekening/rekeningopgave/rekeninghouder
+
+[
+
+	( 
+
+		mobielnummer != ""		           (: Not-Empty :)
+
+		and
+
+		number(mobielnummer) > 0		   (: Not-Empty :)
+
+		and
+
+
+			( 
+				land = "NL"                (: Netherlands Alpha-2 :)
+
+				or 
+
+				land = "NLD"               (: Netherlands Alpha-3 :)
+			)
+
+		and not
+
+		(
+			matches(mobielnummer,'(316|06|6)\d{8}$')
+		)
+	)
+
+]
+```
+
+- Verify that all reported land-line phone numbers for residents are seemingly correct. Ideally, returns 0.
+
+```XPath
+/bericht/rekening/rekeningopgave/rekeninghouder
+
+[
+
+	( 
+
+		telefoonnummer != ""		      (: Not-Empty :)
+
+		and 
+
+		number(telefoonnummer) > 0		  (: Not-Empty :)
+
+		and
+
+			( 
+				land = "NL"               (: Netherlands Alpha-2 :)
+
+				or 
+
+				land = "NLD"              (: Netherlands Alpha-3 :)
+
+			)
+
+		and not
+
+		(
+			matches(telefoonnummer,'(31|0|\d)\d{7}$')
+		)
+	)
+
+]
+```
+
+- Verify that the representative information is also provided if the account holder is indicated as deceased. Ideally, returns 0.
+
+```XPath
+count(
+        /bericht/rekening/rekeningopgave
+        
+        [
+        
+            (
+                rekeninghouder/rechtsvorm="01"        
+                (: 01 = Natural Person :)
+                
+                and
+                
+                rekeninghouder/indicatieOverleden="1"     
+                (: 1 = Deceased Person :)
+                
+                and 
+                
+                rekeninghouder/soortPersoon = "00" 	   
+                (: 00- Account Holder :)
+            )
+            
+            and not
+        
+            (
+                rekeninghouder/rechtsvorm="01"        
+                (: 01 = Natural Person :)
+                
+                and
+                
+                rekeninghouder/indicatieOverleden="0"     
+                (: 0 = Not-Deceased Person :)
+                
+                and 
+                
+                    ( 
+                        
+                        rekeninghouder/soortPersoon = "01"     
+                        (: 01- Fully Authorized Rep:)
+                        
+                        or 
+                        
+                        rekeninghouder/soortPersoon = "02"     
+                        (: 02- Jointly Authorized Rep :)
+                    
+                    )
+        
+            )       
+        
+        ]
+
+)
+```
 
 ######DISCLAIMER: This is a reference sheet for people familiar with XML and XPath. Use it at your own risk! The materials are provided “as is” without any express or implied warranty.
