@@ -1,0 +1,553 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- De Nederlandsche Bank - Schema Dgs aanlevering -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:dgs="http://www.dnb.nl/dgs"
+	targetNamespace="http://www.dnb.nl/dgs" elementFormDefault="qualified" version="1.0.4">
+	<xs:annotation>
+		<xs:documentation>
+		Changes 1.0.4 version:
+		- type EmailadresType pattern removed
+		- type SbiType fixed length restriction replaced by max length restriction		
+		Changes 1.0.3 version:
+		- type PostCodeType pattern restriction removed
+		- type VergunningNummerType changed to max 20 positions
+		- type LandcodeISO3166Type made case insentitive
+		- added minLength=1 restriction to all elements of complexType Bank, 
+		  to VergunningNummerType and RekeningNummerType,
+		  to rekeningnummer and label element of complexType Rekening, 
+		  to productCode and tenaamstelling elements of complexType Rekeningopgave,
+		  to naam, adres and woonplaats elements of complexType Rekeninghouder
+		- volgnummerDeellevering and aantalDeelleveringen elements added minValue=1 restriction
+		  and totalDigits changed to 2
+		- emailadres, geboortedatum, geboorteplaats, geboortelandcode, bSNSofinummer, 
+		  gezamenlijkBelang, sbi elements or complexType Rekeninghouder made optional
+		- removed unused simpleTypes		  
+		Changes 1.0.2 version:
+		- vergunningnummer element changed from optional to required and changed to alphanumeric
+		- optional elements made nillable
+        - elements volgnummerDeellevering and aantalDeelleveringen changed to IntegerPositief4
+        - versienummer made fixed value
+		- GeboorteDatumType changed to make entry of 00 or 99 values for month and day possible        
+		Changes	1.0.1 version:
+		- element soortRekening removed from complexType rekeningOpgave
+		- element aanleveringnummer changed to IntegerPositief10
+		- type LandcodeISO3166Type changed to 2 or 3 characters 
+		- element versienummer changed to StringMax10
+		- annotations translated
+		- type SignType removed
+		- type PositiefNegatiefType removed
+		- element blokkadeRekening changed to StringMax5
+		- element vlagBlokkadePersoon changed to StringMax5
+		- complextype AdresType removed, elements of AdresType moved to complextype Rekeninghouder
+		- element productCode changed to StringMax8
+		- type StringAchtCijfers removed
+		</xs:documentation>
+	</xs:annotation>
+	<xs:element name="bericht">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="rekening" type="dgs:Rekening" maxOccurs="unbounded"/>
+				<xs:element name="versienummer" type="dgs:VersieNummerType">
+					<xs:annotation>
+						<xs:documentation>The fixed value of the field versienummer given in an officially issued 
+							final version of the manual, used for the definition of the file</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="bank" type="dgs:Bank"/>
+				<xs:element name="controle" type="dgs:Controle"/>
+				<xs:element name="soortBestand" type="dgs:SoortBestandType"/>
+				<xs:element name="aanleveringnummer" type="dgs:IntegerPositief10">
+					<xs:annotation>
+						<xs:documentation>Reference number (aanlevernummer) given by DNB for a specific delivery</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="volgnummerDeellevering" type="dgs:Deellevering"/>
+				<xs:element name="aantalDeelleveringen" type="dgs:Deellevering"/>
+				<xs:element name="codeProduktie" type="dgs:CodeProduktie"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<!-- complex types -->
+	<xs:complexType name="Bank">
+		<xs:sequence>
+			<xs:element name="vergunningnummer" type="dgs:VergunningNummerType">
+				<xs:annotation>
+					<xs:documentation>Bank authorisation number (vergunningnummer) received from DNB</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="naam" type="dgs:StringMax50Min1"/>
+			<xs:element name="adres" type="dgs:StringMax22Min1"/>
+			<xs:element name="plaats" type="dgs:StringMax22Min1"/>
+			<xs:element name="kvkNummerBron" type="dgs:KVKNummerTypeMin1"/>
+			<xs:element name="administratieIdentificatie" type="dgs:StringMax8Min1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Controle">
+		<xs:sequence>
+			<xs:element name="aantalgegevensrecords" type="dgs:IntegerPositief8"/>
+			<xs:element name="totaalbedragSaldo" type="dgs:Decimal2" nillable="true"
+				minOccurs="0"/>
+			<xs:element name="totaalbedragRente" type="dgs:Decimal2" nillable="true"
+				minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Rekening">
+		<xs:sequence>
+			<xs:element name="rekeningnummer" type="dgs:RekeningnummerType"/>
+			<xs:element name="label" type="dgs:StringMax50Min1"/>
+			<xs:element name="rekeningopgave_corr" type="dgs:Rekeningopgave" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Contains the original account data (rekeningopgave) that has to be corrected.
+						The accompanying account data (rekeningopgave) replaces the original data in this element.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="rekeningopgave" type="dgs:Rekeningopgave" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Rekeningopgave">
+		<xs:sequence>
+			<xs:element name="rekeninghouder" type="dgs:Rekeninghouder" maxOccurs="unbounded"/>
+			<xs:element name="productCode" type="dgs:StringMax8Min1">
+				<xs:annotation>
+					<xs:documentation>Product code, defined by the bank, of the label (product description)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="saldo" type="dgs:BedragMetValutaType" nillable="true" minOccurs="0"/>
+			<xs:element name="rente" type="dgs:BedragMetValutaType" nillable="true" minOccurs="0"/>
+			<xs:element name="tenaamstelling" type="dgs:StringMax256Min1"/>
+			<xs:element name="blokkadeRekening" type="dgs:StringMax5" nillable="true" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>00000=not blocked (other coding to be delivered by bank)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Rekeninghouder">
+		<xs:sequence>
+			<xs:element name="bSNSofinummer" type="dgs:BSNSofiType" nillable="true" minOccurs="0"/>
+			<xs:element name="tinCode" type="dgs:TinType" nillable="true" minOccurs="0"/>
+			<xs:element name="kVKNummer" type="dgs:KVKNummerType" nillable="true" minOccurs="0"/>
+			<xs:element name="sbi" type="dgs:SbiType" nillable="true" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Standard Industrial Classification; see the SBI classification at the Chamber of Commerce.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="nationaliteit" type="dgs:LandcodeISO3166Type" nillable="true"
+				minOccurs="0"/>
+			<xs:element name="relatienummerBank" type="dgs:RelatienummerType" nillable="true"
+				minOccurs="0"/>
+			<xs:element name="naam" type="dgs:StringMax70Min1"/>
+			<xs:element name="voorletters" type="dgs:StringMax6" nillable="true" minOccurs="0"/>
+			<xs:element name="voorvoegsels" type="dgs:StringMax10" nillable="true" minOccurs="0"/>
+			<xs:element name="adres" type="dgs:StringMax100Min1"/>
+			<xs:element name="huisnummer" type="dgs:StringMaxVijfCijfers"/>
+			<xs:element name="huisnummerToevoeging" type="dgs:StringMax5" nillable="true"
+				minOccurs="0"/>
+			<xs:element name="adres2" type="dgs:StringMax100" nillable="true" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Second address line, often used for addresses outside the Netherlands</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="postcode" type="dgs:PostcodeType" nillable="true" minOccurs="0"/>
+			<xs:element name="woonplaats" type="dgs:StringMax100Min1"/>
+			<xs:element name="provincie" type="dgs:StringMax100" nillable="true" minOccurs="0"/>
+			<xs:element name="land" type="dgs:LandcodeISO3166Type"/>
+			<xs:element name="geboortedatum" type="dgs:GeboortedatumType" nillable="true" minOccurs="0"/>
+			<xs:element name="geboorteplaats" type="dgs:StringMax100" nillable="true" minOccurs="0"/>
+			<xs:element name="geboortelandcode" type="dgs:LandcodeISO3166Type" nillable="true"
+				minOccurs="0"/>
+			<xs:element name="overigeIdentificatie" type="dgs:StringMax100" nillable="true"
+				minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Identifying data other than BSN/TIN, customer number, date of birth, etc.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="indicatieOverleden" type="dgs:NulOfEenType" nillable="true" minOccurs="0"/>
+			<xs:element name="rechtsvorm" type="dgs:RechtsvormType"/>
+			<xs:element name="gezamenlijkBelang" type="dgs:GezamenlijkBelangType" nillable="true"
+				minOccurs="0"/>
+			<xs:element name="soortPersoon" type="dgs:SoortPersoonType"/>
+			<xs:element name="tegenrekening" type="dgs:TegenrekeningType" nillable="true"
+				minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Contra account, for example used in some types of internet saving accounts as valid destination for withdrawals.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="telefoonnummer" type="dgs:TelefoonnummerType" nillable="true"
+				minOccurs="0"/>
+			<xs:element name="mobielnummer" type="dgs:TelefoonnummerType" nillable="true"
+				minOccurs="0"/>
+			<xs:element name="emailadres" type="dgs:EmailadresType" nillable="true" minOccurs="0"/>
+			<xs:element name="vlagBlokkadePersoon" type="dgs:StringMax5" nillable="true"
+				minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>00000=not blocked (other coding to be delivered by bank)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="BedragMetValutaType">
+		<xs:annotation>
+			<xs:documentation>Amount with two decimal places and with currency code</xs:documentation>
+		</xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="dgs:Decimal2">
+				<xs:attribute name="valuta" type="dgs:ValutaType" use="optional"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="TegenrekeningType">
+		<xs:sequence>
+			<xs:element name="tegenrekening" type="dgs:RekeningnummerType">
+				<xs:annotation>
+					<xs:documentation>Valid account number that satisfies any applicable check (like the 11-check or IBAN-check).</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="bicCodeBank" type="dgs:BICType" nillable="true" minOccurs="0"/>
+			<xs:element name="naamBank" type="dgs:StringMax50" nillable="true" minOccurs="0"/>
+			<xs:element name="tenaamstelling" type="dgs:StringMax256" nillable="true" minOccurs="0"
+			/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- simple types speciaal -->
+	<xs:simpleType name="BICType">
+		<xs:annotation>
+			<xs:documentation>BIC belonging with the contra account.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="11"/>
+			<xs:whiteSpace value="collapse"/>
+			<xs:pattern value="[a-zA-Z0-9]*"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="BSNSofiType">
+		<xs:annotation>
+			<xs:documentation>Burger Service Nummer (Citizen service number) assigned by a Dutch municipality 
+				to a natural person, used in communications with the government, must satisfy the 11-check</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:length value="9"/>
+			<xs:whiteSpace value="collapse"/>
+			<xs:pattern value="[0-9]*"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="CodeProduktie">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="P">
+				<xs:annotation>
+					<xs:documentation>Production file</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="T">
+				<xs:annotation>
+					<xs:documentation>Test file, data in this file will not result in payments under DGS.</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="EmailadresType">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="100"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="GeboortedatumType">
+		<xs:annotation>
+			<xs:documentation>Valid date as specified in the manual</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:length value="8" />
+			<xs:pattern value="[1-9]{1}[0-9]{2,8}"></xs:pattern>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="GezamenlijkBelangType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="01">
+				<xs:annotation>
+					<xs:documentation>Joint interest, one person entitled</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="02">
+				<xs:annotation>
+					<xs:documentation>Joint interest, two persons entitled</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="03">
+				<xs:annotation>
+					<xs:documentation>Joint interest, more than two persons entitled</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SoortPersoonType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="00">
+				<xs:annotation>
+					<xs:documentation>Account holder</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="01">
+				<xs:annotation>
+					<xs:documentation>Fully authorised representatieve</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="02">
+				<xs:annotation>
+					<xs:documentation>Jointly authorised representatieve</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="KVKNummerType">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="8"/>
+			<xs:whiteSpace value="collapse"/>
+			<xs:pattern value="[0-9]*"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="KVKNummerTypeMin1">
+		<xs:restriction base="dgs:KVKNummerType">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="LandcodeISO3166Type">
+		<xs:annotation>
+			<xs:documentation>Country coding in accordance with ISO3166, 2 or 3 letter code</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="2"/>
+			<xs:maxLength value="3"/>
+			<xs:pattern value="[a-zA-Z]*"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="NulOfEenType">
+		<xs:restriction base="xs:int">
+			<xs:enumeration value="0"/>
+			<xs:enumeration value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="PostcodeType">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="9"/>
+			<!-- <xs:pattern value="([0-9]{4}[a-zA-Z]{2})?"/> -->
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="RechtsvormType">
+		<xs:annotation>
+			<xs:documentation>Legal form (natural or non-natural person)</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="01">
+				<xs:annotation>
+					<xs:documentation>Natural person</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="02">
+				<xs:annotation>
+					<xs:documentation>Non-natural person</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="RekeningnummerType">
+		<xs:restriction base="dgs:StringMin1">
+			<xs:maxLength value="34"/>
+			<xs:pattern value="[0-9a-zA-Z]*"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SoortRekeningType">
+		<xs:restriction base="xs:int">
+			<xs:enumeration value="0">
+				<xs:annotation>
+					<xs:documentation>Single</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="1">
+				<xs:annotation>
+					<xs:documentation>Joint</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="RelatienummerType">
+		<xs:annotation>
+			<xs:documentation>Bank's customer number</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="34"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SbiType">
+		<xs:annotation>
+			<xs:documentation>Standard Industrial Classification</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="6"/>
+			<xs:pattern value="[0-9]*"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SoortBestandType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="DGSBETSP"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMaxVijfCijfers">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="5"/>
+			<xs:pattern value="[0-9]*"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TelefoonnummerType">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="12"/>
+			<xs:whiteSpace value="collapse"/>
+			<xs:pattern value="[\+0-9]*"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TinType">
+		<xs:annotation>
+			<xs:documentation>Taxpayer Identification Number</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="20"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ValutaType">
+		<xs:annotation>
+			<xs:documentation>Value in accordance with ISO4217 (3 character code for currency)</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:length value="3"/>
+			<xs:pattern value="[a-zA-Z]*"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="VergunningNummerType">
+		<xs:annotation>
+			<xs:documentation>Number of the (bank) authorisation you have received from DNB</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="dgs:StringMin1">
+			<xs:maxLength value="20"/>
+			<xs:pattern value="[0-9a-zA-Z]*"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="VersieNummerType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="01"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!-- simple types generiek -->
+	<xs:simpleType name="Deellevering">
+		<xs:restriction base="dgs:IntegerPositief2">
+			<xs:minInclusive value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="IntegerPositief2">
+		<xs:restriction base="xs:nonNegativeInteger">			
+			<xs:totalDigits value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="IntegerPositief8">
+		<xs:restriction base="xs:nonNegativeInteger">
+			<xs:totalDigits value="8"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="IntegerPositief10">
+		<xs:restriction base="xs:nonNegativeInteger">
+			<xs:totalDigits value="10"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax5">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="5"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax6">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="6"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax8">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="8"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax8Min1">
+		<xs:restriction base="dgs:StringMax8">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax9">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="9"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax10">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="10"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax22">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="22"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax22Min1">
+		<xs:restriction base="dgs:StringMax22">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax40">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="40"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax50">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="50"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax50Min1">
+		<xs:restriction base="dgs:StringMax50">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax70">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="70"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax70Min1">
+		<xs:restriction base="dgs:StringMax70">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax100">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="100"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax100Min1">
+		<xs:restriction base="dgs:StringMax100">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax256">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="256"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMax256Min1">
+		<xs:restriction base="dgs:StringMax256">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Decimal2">
+		<xs:restriction base="xs:decimal">
+			<xs:fractionDigits value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StringMin1">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>
