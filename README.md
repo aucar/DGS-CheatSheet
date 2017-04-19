@@ -1,14 +1,14 @@
-#Cheat Sheet for Deposit Guarantee Scheme XML Data Audit
+# Cheat Sheet for Deposit Guarantee Scheme XML Data Audit
 
 This cheat sheet is a resource in which you will find some XPath queries for the reconciliation of the [Deposit Guarantee Scheme XML](http://www.toezicht.dnb.nl/binaries/50-235542.pdf) data file with your internal reports.
 
 This document is not an audit program, it is written to facilitate completeness, integrity and accuracy tests over the file you are going to supply to the regulatory body. It is up-to-date as of the publication date with XSD schema 1.0.4.
 
-##Key Figures Table
+## Key Figures Table
 
 Compare the results of these queries with your internal reports.
 
-###Accounts
+### Accounts
 
 - How many accounts are reported in DGS XML data file? (Row 1)
 
@@ -142,7 +142,7 @@ count(
 ```
 
 
-###Non-natural Persons
+### Non-natural Persons
 
 - How many account holders are reported with the form of a non-natural person? (Row 6)
 
@@ -228,7 +228,7 @@ count(
 )
 ```
 
-###Representatives
+### Representatives
 
 - How many representatives are reported in DGS XML data file? (Row 9)
 
@@ -461,7 +461,7 @@ count(
 )
 ```
 
-##Other Reconciliations
+## Other Reconciliations
 
 - Which products are reported in DGS XML data file?
 
@@ -693,4 +693,4 @@ count(
 )
 ```
 
-######DISCLAIMER: This is a reference sheet for people familiar with XML and XPath. Use it at your own risk! The materials are provided “as is” without any express or implied warranty.
+###### DISCLAIMER: This is a reference sheet for people familiar with XML and XPath. Use it at your own risk! The materials are provided “as is” without any express or implied warranty.
